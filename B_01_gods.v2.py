@@ -1,10 +1,7 @@
+from tkinter import *
+from functools import partial # To prevent unwanted windows
 import csv
 import random
-
-from functools import partial
-from tkinter import *
-
-
 
 def get_powers():
     """
@@ -13,25 +10,25 @@ def get_powers():
     to a god.
     """
     # retrieve the CSV file
-    file = open("gods_name_power_lists.csv" ,"r")
-    all_powers = list(csv.reader(file, delimiter=","))
+    file = open("gods(Data).csv" ,"r")
+    all_power_names = list(csv.reader(file, delimiter=","))
     file.close()
 
-    all_powers.pop(0)
+    all_power_names.pop(0)
 
-    return all_powers
+    return all_power_names
 
 def get_rounds_power():
     """
     Choose four different power from the list
     """
-    all_powers_list = get_powers()
+    all_power_names_list = get_powers()
 
     round_power = []
     gods_name = []
     #loop until we have 4 different gods
     while len(round_power) < 4:
-        potential_power = random.choice(all_powers_list)
+        potential_power = random.choice(all_power_names_list)
 
         # check if the power is for the correct god
         if potential_power[1] not in gods_name:
@@ -123,20 +120,19 @@ class StartGame:
             self.num_rounds_entry.config(bg="#F4CCCC")
             self.num_rounds_entry.delete(0, END)
 
-
 class Play:
     """
     Interface for playing God's Quiz
     """
     def __init__(self, _amount_):
 
+        self.round_played = int()
         self.play_box = Toplevel()
-        round_played = 1
 
         self.game_frame = Frame(self.play_box, bg="#ffe6cc")
         self.game_frame.grid(padx=10,pady=10)
 
-        self.game_heading_label = Label(self.game_frame, text= f"Round {round_played} of {_amount_}", font=("Arial", 16, "bold"))
+        self.game_heading_label = Label(self.game_frame, text= f"Round 1 of {_amount_}", font=("Arial", 16, "bold"))
         self.game_heading_label.grid(row=0)
 
         # body font for the labels
@@ -171,17 +167,16 @@ class Play:
 
         # create 4 buttons in a 2 x 2 grid to choose the powers
         for item in range(0, 4):
-            self.power_button = Button(self.power_frame, font=("Arial", 12), text= "Power Button", width=15,
-                                       bg="#008cff", command=partial(self.round_results, item))
+            self.power_button = Button(self.power_frame, font=("Arial", 12), text= f"Power", width=15, bg="#008cff")
             self.power_button.grid(row=item// 2, column=item % 2, padx=5, pady=5)
 
             self.power_button_ref.append(self.power_button)
 
         # control for button (frame | text | bg | command | width | row | column)
         control_button_list = [
-            [self.game_frame, "Next Round", "#0057D8", 21, 5, None],
-
-            [self.game_frame, "End", "#990000", self.close_play, 21, 7, None]
+            [self.game_frame, "Next Round", "#0057D8",self.next_round ,21, 5, None],
+            #[self.game_frame, "stats", "#0057D8", self.to_stats, 21, 6, None]
+            [self.game_frame, "End Game", "#990000", self.close_play, 21, 7, None]
         ]
 
         #create buttons and add to list
@@ -193,10 +188,18 @@ class Play:
 
             control_ref_list.append(make_control_button)
 
+            # retrieve next round, and end game button
             self.next_round_button = control_ref_list[0]
-            self.end_game_button = control_ref_list[1]
+            self.end_game_button = control_ref_list[2]
 
-    def new_round(self):
+            self.stats_button = Button(self.game_frame, text="Stats", font=("Arial", 16, "bold"),
+                                          fg="#FFFFFF", bg="#EFBF04",width=21,command=self.to_stats)
+            self.stats_button.grid(row=6, pady=5)
+            self.end_game_button = Button(self.game_frame, text="End Game", font=("Arial", 16, "bold"),
+                                          fg="#FFFFFF", bg="#990000", width=21,command=self.close_play)
+            self.end_game_button.grid(row=7,pady=5)
+
+    def next_round(self):
         """
         Chooses four colours, works out meadian for score to beat. configures buttons with chosen colours
         """
@@ -205,13 +208,13 @@ class Play:
         rounds_played += 1
         self.round_played.set(rounds_played)
 
-        rounds_asked = self.rounds_asked.get()
+        rounds_requested = self.rounds_asked.get()
 
-        # get round colours and meadian score...
-        self.round_power_list = get_rounds_power()
+    # self.round_power_list, median = get_rounds_power()
 
         # update heading and scores to beat labels. "hides" results label
-        # self.heading_label.config(text=f"Round {rounds_played} of {rounds_wanted}")
+        self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
+        self.chosen_label.config(text=f"{'=' * 7}", bg="#F0F0F0")
 
         # configure buttons using foreground and background colours from list
         # enable colour buttons (disabled at the end of the last round)
@@ -220,25 +223,133 @@ class Play:
                         bg=self.round_power_list[count][0],
                         text=self.round_power_list[count][0], state=NORMAL)
 
-        self.next_round_button.config(state=DISABLED)
+        self.next_button.config(state=DISABLED)
 
-    def round_results(self, user_choice):
-        # retieve power names for the buttons
-        power_name = self.power_button_ref[user_choice].cget('text')
-        # retrive if the user's chosen answer is correct or not
-        # if chosen_power >= real_power
-            #result_text = f"Correct! {name_label} does possess {real_power}"
+    def to_stats(self):
+        """
+        Retrieves everything we need to display the game / round statistics"""
 
-        for item in self.power_button_ref:
-            item.config(state=DISABLED)
+        # IMPORTANT: retrieve number of rounds
+        # won as a number (rather than the 'self' container)
+        rounds_won = self.rounds_won.get()
+        stats_bundle = [rounds_won, self.all_scores_list,
+                        self.all_high_score_list]
+
+        Stats(self, stats_bundle)
 
     def close_play(self):
         # shows the root and end current
         root.deiconify()
         # allows new game to start
         self.play_box.destroy()
+class Stats:
+    """
+    Displays stats for Colour Quest Game
+    """
 
+    def __init__(self, partner, all_stats_info):
 
+        # Extract information from master list...
+        rounds_won = all_stats_info[0]
+        user_scores = all_stats_info[1]
+        high_scores = all_stats_info[2]
+
+        # sort user scores to find high score...
+        user_scores.sort()
+        self.stats_box = Toplevel()
+
+        # disable help button
+        partner.stats_button.config(state=DISABLED)
+
+        # If users press cross at top, closes help and
+        # 'releases' help button
+        self.stats_box.protocol('WM_DELETE_WINDOW',
+                                partial(self.close_stats, partner))
+
+        self.stats_frame = Frame(self.stats_box, width=350)
+        self.stats_frame.grid()
+
+        # Math to populate Stats dialogue...
+        rounds_played = len(user_scores)
+
+        success_rate = rounds_won / rounds_played * 100
+        total_score = sum(user_scores)
+        max_possible = sum(high_scores)
+
+        best_score = user_scores[-1]
+        average_score = total_score / rounds_played
+
+        # Strings for Stats labels...
+
+        success_string = (f"Success Rate: {rounds_won} / {rounds_played}"
+                          f" ({success_rate:.0f}%)")
+        total_score_string = f"Total Score: {total_score}"
+        max_possible_string = f"Maximum Possible Score: {max_possible}"
+        best_score_string = f"Best Score: {best_score}"
+
+        # comment formatting, default alignment is W (left), but if
+        # we don't have a comment we want our dashes to be centered.
+        comment_alignment = "W"
+        if total_score == max_possible:
+            comment_string = ("Amazing!  You got the highest "
+                              "possible score!")
+            comment_colour = "#D5E8D4"
+
+        elif total_score == 0:
+            comment_string = ("Oops - You've lost every round!  "
+                              "You might want to look at the hints!")
+            comment_colour = "#F8CECC"
+            best_score_string = f"Best Score: n/a"
+        else:
+            # comment_string = f"{' ' * 15}{'*' * 7}"
+            comment_string = ""
+            comment_colour = "#F0F0F0"
+            comment_alignment = ""
+
+        average_score_string = f"Average Score: {average_score:.0f}\n"
+
+        heading_font = ("Arial", "16", "bold")
+        normal_font = ("Arial", "14")
+        comment_font = ("Arial", "13")
+
+        # Label list (text | font | 'Sticky')
+        all_stats_strings = [
+            ["Statistics", heading_font, ""],
+            [success_string, normal_font, "W"],
+            [total_score_string, normal_font, "W"],
+            [max_possible_string, normal_font, "W"],
+            [comment_string, comment_font, comment_alignment],
+            ["\nRound Stats", heading_font, ""],
+            [best_score_string, normal_font, "W"],
+            [average_score_string, normal_font, "W"]
+        ]
+
+        stats_label_ref_list = []
+        for count, item in enumerate(all_stats_strings):
+            self.stats_label = Label(self.stats_frame, text=item[0], font=item[1], wraplength=300,
+                                     anchor="w", justify="left",
+                                     padx=30, pady=5)
+            self.stats_label.grid(row=count, sticky=item[2], padx=10)
+            stats_label_ref_list.append(self.stats_label)
+
+        # Configure comment label background (for all won / all lost)
+        stats_comment_label = stats_label_ref_list[4]
+        stats_comment_label.config(bg=comment_colour)
+
+        self.dismiss_button = Button(self.stats_frame,
+                                     font=("Arial", 16, "bold"),
+                                     text="Dismiss", bg="#333333",
+                                     fg="#FFFFFF", width=20,
+                                     command=partial(self.close_stats,
+                                                     partner))
+        self.dismiss_button.grid(row=8, padx=10, pady=10)
+
+        # closes help dialogue (used by button and x at top of dialogue)
+
+    def close_stats(self, partner):
+        # Put help button back to normal...
+        partner.stats_button.config(state=NORMAL)
+        self.stats_box.destroy()
 # main routine
 if __name__ == "__main__":
     root = Tk()
