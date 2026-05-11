@@ -10,29 +10,31 @@ def get_powers():
     to a god.
     """
     # retrieve the CSV file
-    file = open("gods(Data).csv" ,"r")
-    all_power_names = list(csv.reader(file, delimiter=","))
+
+    file = open("gods_name_power_lists.csv", "r")
+    all_gods = list(csv.reader(file, delimiter=","))
     file.close()
 
-    all_power_names.pop(0)
+    return all_gods
 
-    return all_power_names
-
-def get_rounds_power():
+def get_round_power():
     """
     Choose four different power from the list
     """
-    all_power_names_list = get_powers()
+    all_gods = get_powers()
+
+    print("all gods", all_gods)
 
     round_power = []
     gods_name = []
     #loop until we have 4 different gods
-    while len(round_power) < 4:
-        potential_power = random.choice(all_power_names_list)
+    while len(round_power) < 1:
+        potential_power = random.choice(all_gods)
 
         # check if the power is for the correct god
         if potential_power[3] not in gods_name:
             round_power.append(potential_power[3])
+            gods_name.append(potential_power)
 
     return round_power
 
@@ -126,6 +128,7 @@ class Play:
     """
     def __init__(self, _amount_):
 
+        self.round_power_list = get_round_power()
         self.round_played = int()
         self.play_box = Toplevel()
 
@@ -167,7 +170,8 @@ class Play:
 
         # create 4 buttons in a 2 x 2 grid to choose the powers
         for item in range(0, 4):
-            self.power_button = Button(self.power_frame, font=("Arial", 12), text= f"Power", width=15, bg="#008cff")
+            self.power_button = Button(self.power_frame, font=("Arial", 12), text=f"{get_round_power()}" ,width=15,
+                                       bg="#008cff")
             self.power_button.grid(row=item// 2, column=item % 2, padx=5, pady=5)
 
             self.power_button_ref.append(self.power_button)
@@ -190,8 +194,6 @@ class Play:
 
             # retrieve next round, and end game button
             self.next_round_button = control_ref_list[0]
-            self.end_game_button = control_ref_list[2]
-
             self.stats_button = Button(self.game_frame, text="Stats", font=("Arial", 16, "bold"),
                                           fg="#FFFFFF", bg="#EFBF04",width=21,command=self.to_stats)
             self.stats_button.grid(row=6, pady=5)
@@ -210,11 +212,9 @@ class Play:
 
         rounds_requested = self.rounds_asked.get()
 
-    # self.round_power_list, median = get_rounds_power()
-
         # update heading and scores to beat labels. "hides" results label
         self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
-        self.chosen_label.config(text=f"{'=' * 7}", bg="#F0F0F0")
+        # self.chosen_label.config(text=f"{'=' * 7}", bg="#F0F0F0")
 
         # configure buttons using foreground and background colours from list
         # enable colour buttons (disabled at the end of the last round)
@@ -224,6 +224,7 @@ class Play:
                         text=self.round_power_list[count][0], state=NORMAL)
 
         self.next_button.config(state=DISABLED)
+
 
     def to_stats(self):
         """
