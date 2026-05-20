@@ -41,7 +41,7 @@ class Play:
         self.game_heading_label = Label(self.game_frame, text= f"Round 1 of {_amount_}", font=("Arial", 16, "bold"))
         self.game_heading_label.grid(row=0)
 
-        self.hints_button = Button(self.game_frame, font=("Arial", 16, "bold"), text="Hints", width=15, fg="FFFFFF",
+        self.hints_button = Button(self.game_frame, font=("Arial", 16, "bold"), text="Hints", width=15, fg="#FFFFFF",
                                    bg="#00FFFF", padx=10, pady=10, command=self.to_hints)
         self.hints_button.grid(row=1)
 
@@ -80,22 +80,22 @@ class DisplayHints:
         help_text = ("If you are struggling to find a power that is for the god  you are asked to look for, "
                      "then there a very easy way to find their power."
                      "\n\nFirst off have a look at their name and try to match it with their power. "
-                     "(Eg: Flora's power is Flower)"
-                     "/n/n The other way off trying to figure out their power is by looking at their Origin or their"
+                     "\n\n(Eg: Flora's power is Flower)"
+                     "\n\n The other way off trying to figure out their power is by looking at their Origin or their"
                      " type. The one with natural powers such as darkness, sky, sea are mostly the god's with Major"
                      " powers, while the one's with  fire, sleep, light are most likely Minor type of God." )
 
         self.help_text_label = Label(self.help_frame, bg=background,
                                          text=help_text, wraplength=350,
-                                         justify="left")
+                                         justify="center")
         self.help_text_label.grid(row=1, padx=10)
 
-        self.dismiss_button = Button(self.help_frame,
+        self.close_button = Button(self.help_frame,
                                          font=("Arial", 12, "bold"),
-                                         text="Dismiss", bg="#CC6600",
+                                         text="Close", bg="#CC6600",
                                          fg="#FFFFFF",
                                          command=partial(self.close_hints,partner))
-        self.dismiss_button.grid(row=2, padx=10, pady=10)
+        self.close_button.grid(row=2, padx=10, pady=10)
 
         # closes help dialogue (used by button and x at top of dialogue)
 
