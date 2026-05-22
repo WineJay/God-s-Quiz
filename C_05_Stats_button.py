@@ -312,11 +312,10 @@ class Stats:
 
         # Extract information from master list...
         rounds_won = all_stats_info[0]
-        user_real_gods = all_stats_info[1]
-        high_real_gods = all_stats_info[2]
+        user_scores = all_stats_info[1]
 
-        # sort user real_gods to find high real_god...
-        user_real_gods.sort()
+        # sort user scores to find high score...
+        user_scores.sort()
         self.stats_box = Toplevel()
 
         # disable help button
@@ -331,43 +330,37 @@ class Stats:
         self.stats_frame.grid()
 
         # Math to populate Stats dialogue...
-        rounds_played = len(user_real_gods)
+        rounds_played = len(user_scores)
+        total_won = sum(rounds_won)
 
         success_rate = rounds_won / rounds_played * 100
-        total_real_god = sum(user_real_gods)
-        max_possible = sum(high_real_gods)
 
-        best_real_god = user_real_gods[-1]
-        average_real_god = total_real_god / rounds_played
+        average_rate = total_won / rounds_played
 
         # Strings for Stats labels...
 
         success_string = (f"Success Rate: {rounds_won} / {rounds_played}"
                           f" ({success_rate:.0f}%)")
-        total_real_god_string = f"Total real_god: {total_real_god}"
-        max_possible_string = f"Maximum Possible real_god: {max_possible}"
-        best_real_god_string = f"Best real_god: {best_real_god}"
+        total_won_string = f"Total Rounds Won: {total_won}"
 
         # comment formatting, default alignment is W (left), but if
         # we don't have a comment we want our dashes to be centered.
         comment_alignment = "W"
-        if total_real_god == max_possible:
+        if total_won == 100:
             comment_string = ("Amazing!  You got the highest "
-                              "possible real_god!")
+                              "possible score!")
             comment_colour = "#D5E8D4"
 
-        elif total_real_god == 0:
+        elif total_won == 0:
             comment_string = ("Oops - You've lost every round!  "
                               "You might want to look at the hints!")
-            comment_colour = "#F8CECH"
-            best_real_god_string = f"Best real_god: n/a"
+            comment_colour = "#F8CECC"
+            best_score_string = f"Best Score: n/a"
         else:
             # comment_string = f"{' ' * 15}{'*' * 7}"
             comment_string = ""
             comment_colour = "#F0F0F0"
             comment_alignment = ""
-
-        average_real_god_string = f"Average real_god: {average_real_god:.0f}\n"
 
         heading_font = ("Arial", "16", "bold")
         normal_font = ("Arial", "14")
@@ -377,12 +370,9 @@ class Stats:
         all_stats_strings = [
             ["Statistics", heading_font, ""],
             [success_string, normal_font, "W"],
-            [total_real_god_string, normal_font, "W"],
-            [max_possible_string, normal_font, "W"],
+            [total_won_string, normal_font, "W"],
             [comment_string, comment_font, comment_alignment],
             ["\nRound Stats", heading_font, ""],
-            [best_real_god_string, normal_font, "W"],
-            [average_real_god_string, normal_font, "W"]
         ]
 
         stats_label_ref_list = []
