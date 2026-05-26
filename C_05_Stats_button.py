@@ -29,14 +29,14 @@ def get_round_power():
     #loop until we have 4 different gods
     while len(round_power) < 4:
         potential_power = random.choice(all_gods_list)
+        one_god = random.choice(all_gods_list)
 
         # check if the power is for the correct god
-        if potential_power[3] not in gods_name :
-            round_power.append(potential_power)
+        if potential_power[3] not in gods_name[2] :
 
     print("round power", round_power)
     return round_power
-
+    return gods_name
 
 class StartGame:
     """
@@ -145,7 +145,7 @@ class Play:
         # List of label details (text|font|bg|row)
         play_label_list = [
 
-            ["Name of the God:", ("Arial", 16, "bold"), "#ffe6cc", 1],
+            ["Name of the God: {}", ("Arial", 16, "bold"), "#ffe6cc", 1],
             ["Choose a power below", body_font, "#D5E8D4", 2],
             ["You chose , result", body_font, "#D5E8D4", 4]
         ]
@@ -231,6 +231,7 @@ class Play:
         """
         retrieves which power button was pressed
         """
+        global rounds_won
         real_god = vars(self.round_power_list[user_choice][3])
 
         # alternate way to get button name. good for buttons have been scrambled
@@ -243,7 +244,7 @@ class Play:
         if real_god >= name_of_god:
             result_text = f"Success! {power_name} earned you {real_god} points"
             result_bg = "#82B366"
-            self.all_real_gods_list.append(real_god)
+            self.all_gods_list.append(real_god)
 
             rounds_won = self.rounds_won.get()
             rounds_won += 1
@@ -293,10 +294,10 @@ class Play:
         # IMPORTANT: retrieve number of rounds
         # won as a number (rather than the 'self' container)
         rounds_won = self.rounds_won.get()
-        stats_bundle = [rounds_won, self.all_real_gods_list,
-                        self.all_real_god_list]
+        stats_bundle = [rounds_won]
 
         Stats(self, stats_bundle)
+        print("stats button rounds won", rounds_won)
 
     def close_play(self):
         # shows the root and end current

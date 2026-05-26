@@ -215,7 +215,7 @@ class Play:
 
         rounds_requested = self.round_asked
         # update heading and real_gods to beat labels. "hides" results label
-        self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
+        # self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
         # self.chosen_label.config(text=f"{'=' * 7}", bg="#F0F0F0")
 
         self.round_power_list = get_round_power()
