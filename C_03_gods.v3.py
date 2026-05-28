@@ -23,7 +23,6 @@ def get_round_power():
     """
     all_gods_list = get_powers()
 
-
     round_power = []
     gods_name = []
     #loop until we have 4 different gods
@@ -33,10 +32,28 @@ def get_round_power():
         # check if the power is for the correct god
         if potential_power[3] not in gods_name :
             round_power.append(potential_power)
-
     print("round power", round_power)
+
     return round_power
+
+
+def get_gods_name():
+    """get one god from the 4 random powers"""
+    potential_power = get_round_power()
+    round_power = []
+    gods_name = []
+    # get the gods name
+    while len(gods_name) <1:
+        random_god = random.choice(potential_power)
+
+        # find one god from the 4 random list
+        if random_god[2] not in round_power:
+            gods_name.append(random_god)
+
+        print("god of power", gods_name)
     return gods_name
+
+
 
 class StartGame:
     """
@@ -145,7 +162,7 @@ class Play:
         # List of label details (text|font|bg|row)
         play_label_list = [
 
-            ["Name of the God: {}", ("Arial", 16, "bold"), "#ffe6cc", 1],
+            [f"Name of the God:{get_gods_name()}", ("Arial", 16, "bold"), "#ffe6cc", 1],
             ["Choose a power below", body_font, "#D5E8D4", 2],
             ["You chose , result", body_font, "#D5E8D4", 4]
         ]
@@ -161,6 +178,9 @@ class Play:
         # retrieving the labels
         self.name_label = play_label_ref[0]
         self.chosen_label = play_label_ref[2]
+
+        for item in range(1):
+            self.gods_name = get_powers()
 
         # powers for the buttons
         self.power_frame = Frame(self.game_frame, bg="#ffe6cc")
@@ -215,7 +235,7 @@ class Play:
 
         rounds_requested = self.round_asked
         # update heading and real_gods to beat labels. "hides" results label
-        self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
+        # self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
         # self.chosen_label.config(text=f"{'=' * 7}", bg="#F0F0F0")
 
         self.round_power_list = get_round_power()
@@ -231,7 +251,6 @@ class Play:
         """
         retrieves which power button was pressed
         """
-        global rounds_won
         real_god = vars(self.round_power_list[user_choice][3])
 
         # alternate way to get button name. good for buttons have been scrambled
@@ -244,7 +263,7 @@ class Play:
         if real_god >= name_of_god:
             result_text = f"Success! {power_name} earned you {real_god} points"
             result_bg = "#82B366"
-            self.all_gods_list.append(real_god)
+            self.all_real_gods_list.append(real_god)
 
             rounds_won = self.rounds_won.get()
             rounds_won += 1
@@ -294,10 +313,10 @@ class Play:
         # IMPORTANT: retrieve number of rounds
         # won as a number (rather than the 'self' container)
         rounds_won = self.rounds_won.get()
-        stats_bundle = [rounds_won]
+        stats_bundle = [rounds_won, self.all_real_gods_list,
+                        self.all_real_god_list]
 
         Stats(self, stats_bundle)
-        print("stats button rounds won", rounds_won)
 
     def close_play(self):
         # shows the root and end current
@@ -313,10 +332,11 @@ class Stats:
 
         # Extract information from master list...
         rounds_won = all_stats_info[0]
-        user_scores = all_stats_info[1]
+        user_real_gods = all_stats_info[1]
+        high_real_gods = all_stats_info[2]
 
-        # sort user scores to find high score...
-        user_scores.sort()
+        # sort user real_gods to find high real_god...
+        user_real_gods.sort()
         self.stats_box = Toplevel()
 
         # disable help button
@@ -331,37 +351,43 @@ class Stats:
         self.stats_frame.grid()
 
         # Math to populate Stats dialogue...
-        rounds_played = len(user_scores)
-        total_won = sum(rounds_won)
+        rounds_played = len(user_real_gods)
 
         success_rate = rounds_won / rounds_played * 100
+        total_real_god = sum(user_real_gods)
+        max_possible = sum(high_real_gods)
 
-        average_rate = total_won / rounds_played
+        best_real_god = user_real_gods[-1]
+        average_real_god = total_real_god / rounds_played
 
         # Strings for Stats labels...
 
         success_string = (f"Success Rate: {rounds_won} / {rounds_played}"
                           f" ({success_rate:.0f}%)")
-        total_won_string = f"Total Rounds Won: {total_won}"
+        total_real_god_string = f"Total real_god: {total_real_god}"
+        max_possible_string = f"Maximum Possible real_god: {max_possible}"
+        best_real_god_string = f"Best real_god: {best_real_god}"
 
         # comment formatting, default alignment is W (left), but if
         # we don't have a comment we want our dashes to be centered.
         comment_alignment = "W"
-        if total_won == 100:
+        if total_real_god == max_possible:
             comment_string = ("Amazing!  You got the highest "
-                              "possible score!")
+                              "possible real_god!")
             comment_colour = "#D5E8D4"
 
-        elif total_won == 0:
+        elif total_real_god == 0:
             comment_string = ("Oops - You've lost every round!  "
                               "You might want to look at the hints!")
-            comment_colour = "#F8CECC"
-            best_score_string = f"Best Score: n/a"
+            comment_colour = "#F8CECH"
+            best_real_god_string = f"Best real_god: n/a"
         else:
             # comment_string = f"{' ' * 15}{'*' * 7}"
             comment_string = ""
             comment_colour = "#F0F0F0"
             comment_alignment = ""
+
+        average_real_god_string = f"Average real_god: {average_real_god:.0f}\n"
 
         heading_font = ("Arial", "16", "bold")
         normal_font = ("Arial", "14")
@@ -371,9 +397,12 @@ class Stats:
         all_stats_strings = [
             ["Statistics", heading_font, ""],
             [success_string, normal_font, "W"],
-            [total_won_string, normal_font, "W"],
+            [total_real_god_string, normal_font, "W"],
+            [max_possible_string, normal_font, "W"],
             [comment_string, comment_font, comment_alignment],
             ["\nRound Stats", heading_font, ""],
+            [best_real_god_string, normal_font, "W"],
+            [average_real_god_string, normal_font, "W"]
         ]
 
         stats_label_ref_list = []
