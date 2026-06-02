@@ -39,16 +39,15 @@ def get_round_power():
 
 def get_gods_name():
     """get one god from the 4 random powers"""
-    potential_power = get_round_power()
     round_power = []
     gods_name = []
     # get the gods name
     while len(gods_name) <1:
-        random_god = random.choice(potential_power)
+        random_god = random.choice(round_power)
 
         # find one god from the 4 random list
         if random_god[2] not in round_power:
-            gods_name.append(random_god)
+            gods_name.append(random_god[2])
 
         print("god of power", gods_name)
     return gods_name
@@ -157,12 +156,16 @@ class Play:
         self.game_heading_label = Label(self.game_frame, text= f"Round 1 of {_amount_}", font=("Arial", 16, "bold"))
         self.game_heading_label.grid(row=0)
 
+        self.gods_name_label = Label(self.game_frame, text = f"Name of God {get_gods_name()}", font=("Arial", 16, "bold"))
+        self.gods_name_label.grid(row=1)
+
+        self.gods_name_ref = []
         # body font for the labels
         body_font = ("Arial", 12)
         # List of label details (text|font|bg|row)
         play_label_list = [
 
-            [f"Name of the God:{get_gods_name()}", ("Arial", 16, "bold"), "#ffe6cc", 1],
+            #[f"Name of the God:{gods_name}", ("Arial", 16, "bold"), "#ffe6cc", 1],
             ["Choose a power below", body_font, "#D5E8D4", 2],
             ["You chose , result", body_font, "#D5E8D4", 4]
         ]
@@ -177,11 +180,6 @@ class Play:
 
         # retrieving the labels
         self.name_label = play_label_ref[0]
-        self.chosen_label = play_label_ref[2]
-
-        for item in range(1):
-            self.gods_name = get_powers()
-
         # powers for the buttons
         self.power_frame = Frame(self.game_frame, bg="#ffe6cc")
         self.power_frame.grid(row=3)
@@ -210,7 +208,7 @@ class Play:
         for item in control_button_list:
             make_control_button = Button(item[0], text=item[1], bg=item[2],command=item[3],
                                          font=("Arial", 16, "bold"), fg="#FFFFFF", width=item[4])
-            make_control_button.grid(row=item[5], column=item[6], padx=5, pady=5)
+            make_control_button.grid(row=item[5],column=item[6], padx=5, pady=5)
 
             control_ref_list.append(make_control_button)
 
@@ -224,6 +222,7 @@ class Play:
             self.end_game_button.grid(row=7,pady=5)
 
             self.next_round()
+
     def next_round(self):
         """
         Chooses four colours, works out meadian for real_god to beat. configures buttons with chosen colours
@@ -233,17 +232,20 @@ class Play:
         rounds_played += 1
         self.round_played.set(rounds_played)
 
-        rounds_requested = self.round_asked
+        rounds_requested = self._amount_
         # update heading and real_gods to beat labels. "hides" results label
-        # self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
+        self.game_heading_label.config(text=f"Round {rounds_played} of {rounds_requested}")
         # self.chosen_label.config(text=f"{'=' * 7}", bg="#F0F0F0")
 
-        self.round_power_list = get_round_power()
         # configure buttons using foreground and background colours from list
         # enable colour buttons (disabled at the end of the last round)
+
         for count, item in enumerate(self.power_button_ref):
             print("button text?", self.round_power_list[count][3])
             item.config(text=self.round_power_list[count][3], state=NORMAL)
+
+       # for count, item in enumerate(self.gods_name_label):
+            #item.config(text=self.gods_name_label[count], state=NORMAL)
 
         self.next_round_button.config(state=DISABLED)
 
@@ -257,7 +259,7 @@ class Play:
         power_name = self.power_button_ref[user_choice].cget('text')
 
         # retrieve target real_god and compare with user real_god to find round result
-        name_of_god = self.real_god.append()
+        name_of_god = self.gods_name_ref[user_choice].cget('text')
 
 
         if real_god >= name_of_god:
