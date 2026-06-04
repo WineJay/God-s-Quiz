@@ -1,3 +1,4 @@
+from enum import auto
 from tkinter import *
 from functools import partial # To prevent unwanted windows
 import csv
@@ -131,7 +132,8 @@ class Play:
         self.round_played = IntVar()
         self.round_played.set(0)
 
-        self.round_power_list = get_round_power()
+        self.round_power_list = ()
+        self.gods_name_from_list = ()
         self.play_box = Toplevel()
 
         self.game_frame = Frame(self.play_box, bg="#ffe6cc")
@@ -139,7 +141,7 @@ class Play:
 
         self.game_heading_label = Label(self.game_frame, text= f"Round 1 of {_amount_}", font=("Arial", 16, "bold"))
         self.game_heading_label.grid(row=0)
-
+        
         # body font for the labels
         body_font = ("Arial", 12)
         # List of label details (text|font|bg|row)
@@ -231,7 +233,7 @@ class Play:
         """
         retrieves which power button was pressed
         """
-        real_god = vars(self.round_power_list[user_choice][3])
+        real_god = vars(self.round_power_list[user_choice][2])
 
         # alternate way to get button name. good for buttons have been scrambled
         power_name = self.power_button_ref[user_choice].cget('text')
@@ -240,7 +242,7 @@ class Play:
         name_of_god = self.real_god.append()
 
 
-        if real_god >= name_of_god:
+        if real_god == name_of_god:
             result_text = f"Success! {power_name} earned you {real_god} points"
             result_bg = "#82B366"
             self.all_real_gods_list.append(real_god)

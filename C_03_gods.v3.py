@@ -32,13 +32,24 @@ def get_round_power():
         # check if the power is for the correct god
         if potential_power[3] not in gods_name :
             round_power.append(potential_power)
-            gods_name.append(potential_power[2])
 
     print("round power", round_power)
-    print("gods name", gods_name)
+
     return round_power, gods_name
 
+def get_gods_name():
+    all_gods_list = get_powers()
+    round_power = get_round_power()
+    gods_name = []
 
+    while len(gods_name) < 1:
+        real_god = all_gods_list
+        if real_god[3] not in round_power:
+            gods_name.append(real_god)
+
+    return gods_name
+
+    print("gods name", gods_name)
 class StartGame:
     """
     Initial game interface (asks users how many rounds they would like to play)
@@ -204,7 +215,7 @@ class Play:
                                           fg="#FFFFFF", bg="#990000", width=21,command=self.close_play)
             self.end_game_button.grid(row=7,pady=5)
 
-            self.next_round()
+        self.next_round()
     def next_round(self):
         """
         Chooses four colours, works out meadian for real_god to beat. configures buttons with chosen colours
@@ -223,8 +234,8 @@ class Play:
         # configure buttons using foreground and background colours from list
         # enable colour buttons (disabled at the end of the last round)
         for count, item in enumerate(self.power_button_ref):
-            print("button text?", self.round_power_list[count][3])
-            item.config(text=self.round_power_list[count][3], state=NORMAL)
+            print("button text?", self.round_power_list)
+            item.config(text=self.round_power_list, state=NORMAL)
 
         self.next_round_button.config(state=DISABLED)
 
@@ -294,8 +305,7 @@ class Play:
         # IMPORTANT: retrieve number of rounds
         # won as a number (rather than the 'self' container)
         rounds_won = self.rounds_won.get()
-        stats_bundle = [rounds_won, self.all_real_gods_list,
-                        self.all_real_god_list]
+        stats_bundle = [rounds_won]
 
         Stats(self, stats_bundle)
 
