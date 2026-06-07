@@ -28,12 +28,13 @@ def get_round_power():
     round_power = []
     gods_name = []
     #loop until we have 4 different gods
-    while len(round_power) < 4:
+    while len(round_power) < min(4, len(all_gods_list)):
         potential_power = random.choice(all_gods_list)
 
         # check if the power is for the correct god
         if potential_power[3] not in gods_name :
             round_power.append(potential_power)
+            gods_name.append(potential_power[2])
 
     print("round power", round_power)
     return round_power
@@ -128,12 +129,17 @@ class Play:
     """
     def __init__(self, _amount_):
 
-        self.round_asked = ()
+        self.round_asked = IntVar(value=_amount_)
         self.round_played = IntVar()
         self.round_played.set(0)
+        self.rounds_won = IntVar()
+        self.rounds_won.set(0)
+
+        self.all_real_gods_list = []
+
 
         self.round_power_list = ()
-        self.gods_name_from_list = ()
+        self.target_god = ()
         self.play_box = Toplevel()
 
         self.game_frame = Frame(self.play_box, bg="#ffe6cc")
@@ -197,15 +203,15 @@ class Play:
             control_ref_list.append(make_control_button)
 
             # retrieve next round, and end game button
-            self.next_round_button = control_ref_list[0]
-            self.stats_button = Button(self.game_frame, text="Stats", font=("Arial", 16, "bold"),
+        self.next_round_button = control_ref_list[0]
+        self.stats_button = Button(self.game_frame, text="Stats", font=("Arial", 16, "bold"),
                                           fg="#FFFFFF", bg="#EFBF04",width=21,command=self.to_stats)
-            self.stats_button.grid(row=6, pady=5)
-            self.end_game_button = Button(self.game_frame, text="End Game", font=("Arial", 16, "bold"),
+        self.stats_button.grid(row=6, pady=5)
+        self.end_game_button = Button(self.game_frame, text="End Game", font=("Arial", 16, "bold"),
                                           fg="#FFFFFF", bg="#990000", width=21,command=self.close_play)
-            self.end_game_button.grid(row=7,pady=5)
+        self.end_game_button.grid(row=7,pady=5)
 
-            self.next_round()
+        self.next_round()
     def next_round(self):
         """
         Chooses four colours, works out meadian for real_god to beat. configures buttons with chosen colours
@@ -266,10 +272,10 @@ class Play:
         rounds_played = self.round_played.get()
         rounds_played += 1
         self.round_played.set(rounds_played)
-        rounds_wanted = self.rounds_wanted.get()
+        rounds_asked = self.rounds_asked.get()
 
         # code for when the game ends
-        if rounds_played == rounds_wanted:
+        if rounds_played == rounds_asked:
 
             #work out the success rate
             success_rate = rounds_won / rounds_played * 100

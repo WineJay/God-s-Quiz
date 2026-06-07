@@ -94,7 +94,8 @@ class StartGame:
         # Retrieve Temperature to be converted.
         round_asked = self.num_rounds_entry.get()
 
-        #reset label and entry box ( for when user comes back to home screen)
+        #reset label and entry bo+
+        # x ( for when user comes back to home screen)
         self.choose_label.config(fg="#009900", font=("Arial", 12, "bold"))
         self.num_rounds_entry.config()
 
