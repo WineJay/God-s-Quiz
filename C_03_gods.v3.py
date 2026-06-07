@@ -171,7 +171,8 @@ class Play:
 
         # retrieving the labels
         self.name_label = play_label_ref[0]
-        self.chosen_label = play_label_ref[2]
+        self.chosen_label = play_label_ref[1]
+        self.results_label = play_label_ref[2]
 
         # powers for the buttons
         self.power_frame = Frame(self.game_frame, bg="#ffe6cc")
@@ -225,7 +226,7 @@ class Play:
         rounds_played += 1
         self.round_played.set(rounds_played)
 
-        rounds_requested = self.round_asked
+        rounds_requested = self.round_asked.get()
 
         self.round_power_list = get_round_power()
         # enable power buttons (disabled at the end of the last round)
@@ -237,6 +238,7 @@ class Play:
         self.target_god = real_god[2]
 
         self.name_label.config(text=f"Name of god: {self.target_god}")
+        self.results_label.config(text=f"{'='}")
 
         for count, item in enumerate(self.power_button_ref):
             print("button text?", self.round_power_list[count][3])
@@ -248,15 +250,15 @@ class Play:
         """
         retrieves which power button was pressed
         """
-        real_god = vars(self.round_power_list[user_choice][2])
+        real_god = self.target_god
 
         # alternate way to get button name. good for buttons have been scrambled
         power_name = self.power_button_ref[user_choice].cget('text')
 
         # retrieve target real_god and compare with user real_god to find round result
-        name_of_god = self.real_god.append()
+        target_god = self.real_god.append()
 
-        if real_god == name_of_god:
+        if target_god == real_god:
             result_text = f"Success! {power_name} earned you {real_god} points"
             result_bg = "#82B366"
             self.all_real_gods_list.append(real_god)
@@ -267,7 +269,7 @@ class Play:
         else:
             result_text = f"Oops {power_name} is not for ({real_god})."
             result_bg = "#F8CECH"
-            self.all_gods_list.append(0)
+            self.target_god.append(0)
 
         self.results_label.config(text=result_text, bg=result_bg)
 
@@ -308,8 +310,7 @@ class Play:
         # IMPORTANT: retrieve number of rounds
         # won as a number (rather than the 'self' container)
         rounds_won = self.rounds_won.get()
-        stats_bundle = [rounds_won, self.all_real_gods_list,
-                        self.all_real_god_list]
+        stats_bundle = [rounds_won, self.all_real_gods_list]
 
         Stats(self, stats_bundle)
 
@@ -329,11 +330,11 @@ class Stats:
 
         # Extract information from master list...
         rounds_won = all_stats_info[0]
-        user_real_gods = all_stats_info[1]
-        high_real_gods = all_stats_info[2]
+        user_played = all_stats_info[1]
+        #potential_power = all_stats_info[2]
 
         # sort user real_gods to find high real_god...
-        user_real_gods.sort()
+        user_played.sort()
         self.stats_box = Toplevel()
 
         # disable help button
@@ -348,27 +349,27 @@ class Stats:
         self.stats_frame.grid()
 
         # Math to populate Stats dialogue...
-        rounds_played = len(user_real_gods)
+        rounds_played = len(user_played)
 
         success_rate = rounds_won / rounds_played * 100
-        total_real_god = sum(user_real_gods)
-        max_possible = sum(high_real_gods)
+        total_real_god = sum(user_played)
+        #max_possible = sum(high_real_gods)
 
-        best_real_god = user_real_gods[-1]
-        average_real_god = total_real_god / rounds_played
+        #best_real_god = user_real_gods[-1]
+        #average_real_god = total_real_god / rounds_played
 
         # Strings for Stats labels...
 
         success_string = (f"Success Rate: {rounds_won} / {rounds_played}"
                           f" ({success_rate:.0f}%)")
         total_real_god_string = f"Total real_god: {total_real_god}"
-        max_possible_string = f"Maximum Possible real_god: {max_possible}"
-        best_real_god_string = f"Best real_god: {best_real_god}"
+        #max_possible_string = f"Maximum Possible real_god: {max_possible}"
+        #best_real_god_string = f"Best real_god: {best_real_god}"
 
         # comment formatting, default alignment is W (left), but if
         # we don't have a comment we want our dashes to be centered.
         comment_alignment = "W"
-        if total_real_god == max_possible:
+        if total_real_god == rounds_played:
             comment_string = ("Amazing!  You got the highest "
                               "possible real_god!")
             comment_colour = "#D5E8D4"
@@ -377,14 +378,14 @@ class Stats:
             comment_string = ("Oops - You've lost every round!  "
                               "You might want to look at the hints!")
             comment_colour = "#F8CECH"
-            best_real_god_string = f"Best real_god: n/a"
+            #best_real_god_string = f"Best real_god: n/a"
         else:
             # comment_string = f"{' ' * 15}{'*' * 7}"
             comment_string = ""
             comment_colour = "#F0F0F0"
             comment_alignment = ""
 
-        average_real_god_string = f"Average real_god: {average_real_god:.0f}\n"
+        #average_real_god_string = f"Average real_god: {average_real_god:.0f}\n"
 
         heading_font = ("Arial", "16", "bold")
         normal_font = ("Arial", "14")
@@ -395,11 +396,11 @@ class Stats:
             ["Statistics", heading_font, ""],
             [success_string, normal_font, "W"],
             [total_real_god_string, normal_font, "W"],
-            [max_possible_string, normal_font, "W"],
+            #[max_possible_string, normal_font, "W"],
             [comment_string, comment_font, comment_alignment],
             ["\nRound Stats", heading_font, ""],
-            [best_real_god_string, normal_font, "W"],
-            [average_real_god_string, normal_font, "W"]
+            #[best_real_god_string, normal_font, "W"],
+            #[average_real_god_string, normal_font, "W"]
         ]
 
         stats_label_ref_list = []
