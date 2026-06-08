@@ -131,6 +131,7 @@ class Play:
 
     def __init__(self, _amount_):
 
+        self.real_god = ()
         self.round_asked = IntVar(value=_amount_)
         self.round_played = IntVar()
         self.round_played.set(0)
@@ -156,7 +157,7 @@ class Play:
 
             ["", ("Arial", 16, "bold"), "#ffe6cc", 1],
             ["Choose a power below", body_font, "#D5E8D4", 2],
-            ["You chose , result", body_font, "#D5E8D4", 4]
+            ["You chose  , result", body_font, "#D5E8D4", 4]
         ]
 
         play_label_ref = []
@@ -236,7 +237,7 @@ class Play:
         self.target_god = real_god[2]
 
         self.name_label.config(text=f"Name of god: {self.target_god}")
-        self.results_label.config(text=f"{'='}")
+        #self.results_label.config(text=f"{'='}")
 
         for count, item in enumerate(self.power_button_ref):
             print("button text?", self.round_power_list[count][3])
@@ -248,28 +249,28 @@ class Play:
         """
         retrieves which power button was pressed
         """
-        real_god = self.target_god
+        # real_god = self.target_god
 
         # alternate way to get button name. good for buttons have been scrambled
         power_name = self.power_button_ref[user_choice].cget('text')
 
         # retrieve target real_god and compare with user real_god to find round result
-        target_god = self.real_god.append()
+        target = self.target_god.get()
 
-        if target_god == real_god:
-            result_text = f"Success! {power_name} earned you {real_god} points"
+        if target == self.real_god:
+            result_text = f"Success! {power_name} was the answer!"
             result_bg = "#82B366"
-            self.all_real_gods_list.append(real_god)
+            self.all_real_gods_list.append(self.real_god)
 
             rounds_won = self.rounds_won.get()
             rounds_won += 1
             self.rounds_won.set(rounds_won)
         else:
-            result_text = f"Oops {power_name} is not for ({real_god})."
+            result_text = f"Oops {power_name} is not for ({target})."
             result_bg = "#F8CECH"
             self.target_god.append(0)
 
-        self.results_label.config(text=result_text, bg=result_bg)
+        self.results_label.config(text=result_text)
 
         # enables stats & next button, disable colour buttons
         self.next_round_button.config(state=NORMAL)
@@ -291,9 +292,8 @@ class Play:
                               f"({success_rate:.0f}%)")
 
             # CONFIGURE 'END GAME' labels / buttons
-            self.heading_label.config(text="Game Over")
-            self.choose_label.config(text="Please click the stats button for more info.")
-
+            self.game_heading_label.config(text="Game Over")
+            self.chosen_label.config(text="Please click the stats button for more info.")
             self.next_round_button.config(state=DISABLED, text="Game Over")
             self.stats_button.config(bg="#990000")
             self.end_game_button.config(text="Play Again", bg="#006600")

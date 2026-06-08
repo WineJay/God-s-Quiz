@@ -143,6 +143,7 @@ class Play:
 
         self.round_power_list = ()
         self.target_god = ()
+        self.rounds_requested = IntVar()
         self.play_box = Toplevel()
 
         self.game_frame = Frame(self.play_box, bg="#ffe6cc")
@@ -223,8 +224,8 @@ class Play:
         """
         # retrieve number of rounds played, add one tp it and configure heading
         rounds_played = self.round_played.get()
-        rounds_played += 1
-        self.round_played.set(rounds_played)
+        #rounds_played += 1
+        #self.round_played.set(rounds_played)
 
         rounds_requested = self.round_asked.get()
 
@@ -237,6 +238,7 @@ class Play:
         # since my gods name is in index 2
         self.target_god = real_god[2]
 
+        self.game_heading_label.config(text=f"Round {rounds_played +1} of {rounds_requested} ")
         self.name_label.config(text=f"Name of god: {self.target_god}")
         self.results_label.config(text=f"{'='}")
 
@@ -256,10 +258,11 @@ class Play:
         power_name = self.power_button_ref[user_choice].cget('text')
 
         # retrieve target real_god and compare with user real_god to find round result
-        target_god = self.real_god.append()
+        # self.target_god.config(real_god)
+        target = self.target_god
 
-        if target_god == real_god:
-            result_text = f"Success! {power_name} earned you {real_god} points"
+        if target == real_god:
+            result_text = f"Success! {power_name} was the answer for {real_god}"
             result_bg = "#82B366"
             self.all_real_gods_list.append(real_god)
 
@@ -282,19 +285,18 @@ class Play:
         rounds_played = self.round_played.get()
         rounds_played += 1
         self.round_played.set(rounds_played)
-        rounds_asked = self.rounds_asked.get()
+        rounds_requested = self.rounds_requested.get()
 
         # code for when the game ends
-        if rounds_played == rounds_asked:
+        if rounds_played == rounds_requested:
             # work out the success rate
             success_rate = rounds_won / rounds_played * 100
-            success_string = (f"Success Rate: "
-                              f"{rounds_won} / {rounds_played} "
+            success_string = (f"Success Rate: " f"{rounds_won} / {rounds_played} "
                               f"({success_rate:.0f}%)")
 
             # CONFIGURE 'END GAME' labels / buttons
-            self.heading_label.config(text="Game Over")
-            self.choose_label.config(text="Please click the stats button for more info.")
+            self.game_heading_label.config(text="Game Over")
+            self.chosen_label.config(text="Please click the stats button for more info.")
 
             self.next_round_button.config(state=DISABLED, text="Game Over")
             self.stats_button.config(bg="#990000")
