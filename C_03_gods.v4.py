@@ -1,3 +1,5 @@
+from enum import auto
+from pydoc import text
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
 import csv
@@ -131,7 +133,6 @@ class Play:
 
     def __init__(self, _amount_):
 
-        self.real_god = ()
         self.round_asked = IntVar(value=_amount_)
         self.round_played = IntVar()
         self.round_played.set(0)
@@ -142,6 +143,8 @@ class Play:
 
         self.round_power_list = ()
         self.target_god = ()
+        self.target_power= ()
+        self.rounds_requested = IntVar()
         self.play_box = Toplevel()
 
         self.game_frame = Frame(self.play_box, bg="#ffe6cc")
@@ -157,7 +160,7 @@ class Play:
 
             ["", ("Arial", 16, "bold"), "#ffe6cc", 1],
             ["Choose a power below", body_font, "#D5E8D4", 2],
-            ["You chose  , result", body_font, "#D5E8D4", 4]
+            ["You chose , result", body_font, "#D5E8D4", 4]
         ]
 
         play_label_ref = []
@@ -222,8 +225,8 @@ class Play:
         """
         # retrieve number of rounds played, add one tp it and configure heading
         rounds_played = self.round_played.get()
-        rounds_played += 1
-        self.round_played.set(rounds_played)
+        #rounds_played += 1
+        #self.round_played.set(rounds_played)
 
         rounds_requested = self.round_asked.get()
 
@@ -232,12 +235,15 @@ class Play:
 
         # picks a god from the 4 sets it retreives and then picks a random 1 out of 4
         real_god = random.choice(self.round_power_list)
+        print("random string out of the 4", real_god)
 
-        # since my gods name is in index 2
+        # since my gods name is in index 2 and power in 3
         self.target_god = real_god[2]
+        #self.target_power = real_god[3]
 
+        self.game_heading_label.config(text=f"Round {rounds_played +1} of {rounds_requested} ")
         self.name_label.config(text=f"Name of god: {self.target_god}")
-        #self.results_label.config(text=f"{'='}")
+        self.results_label.config(text=f"{'='}")
 
         for count, item in enumerate(self.power_button_ref):
             print("button text?", self.round_power_list[count][3])
@@ -249,28 +255,33 @@ class Play:
         """
         retrieves which power button was pressed
         """
-        # real_god = self.target_god
+        real_god = self.target_god
+        real_power = self.target_power
 
         # alternate way to get button name. good for buttons have been scrambled
         power_name = self.power_button_ref[user_choice].cget('text')
 
         # retrieve target real_god and compare with user real_god to find round result
-        target = self.target_god.get()
+        # self.target_god.config(real_god)
+        #target = self.target_god
+        target_power = self.target_power
 
-        if target == self.real_god:
-            result_text = f"Success! {power_name} was the answer!"
+        if  target_power == power_name:
+            pass
+            result_text = f"Success! {power_name} was the answer for {real_god}"
             result_bg = "#82B366"
-            self.all_real_gods_list.append(self.real_god)
+            self.all_real_gods_list.append(real_god)
+            self.all_real_gods_list.append(real_power)
 
             rounds_won = self.rounds_won.get()
             rounds_won += 1
             self.rounds_won.set(rounds_won)
         else:
-            result_text = f"Oops {power_name} is not for ({target})."
-            result_bg = "#F8CECH"
-            self.target_god.append(0)
+            result_text = f"Oops {power_name} is not the power of {real_god}."
+            result_bg = "#F8CECC"
+            self.all_real_gods_list.append(real_god)
 
-        self.results_label.config(text=result_text)
+        self.results_label.config(text=result_text, bg=result_bg)
 
         # enables stats & next button, disable colour buttons
         self.next_round_button.config(state=NORMAL)
@@ -281,25 +292,32 @@ class Play:
         rounds_played = self.round_played.get()
         rounds_played += 1
         self.round_played.set(rounds_played)
-        rounds_asked = self.rounds_asked.get()
+        rounds_requested = self.rounds_requested.get()
 
         # code for when the game ends
-        if rounds_played == rounds_asked:
+        if rounds_played == rounds_requested:
             # work out the success rate
-            success_rate = rounds_won / rounds_played * 100
-            success_string = (f"Success Rate: "
-                              f"{rounds_won} / {rounds_played} "
+            success_rate = rounds_played / rounds_won * 100
+            success_string = (f"Success Rate: " f"{rounds_won} / {rounds_played} "
                               f"({success_rate:.0f}%)")
 
             # CONFIGURE 'END GAME' labels / buttons
             self.game_heading_label.config(text="Game Over")
             self.chosen_label.config(text="Please click the stats button for more info.")
+
             self.next_round_button.config(state=DISABLED, text="Game Over")
             self.stats_button.config(bg="#990000")
             self.end_game_button.config(text="Play Again", bg="#006600")
 
         for item in self.power_button_ref:
             item.config(state=DISABLED)
+
+
+    def close_play(self):
+        # shows the root and end current
+        root.deiconify()
+        # allows new game to start
+        self.play_box.destroy()
 
     def to_stats(self):
         """
@@ -308,16 +326,9 @@ class Play:
         # IMPORTANT: retrieve number of rounds
         # won as a number (rather than the 'self' container)
         rounds_won = self.rounds_won.get()
-        real_god = self.target_god.get()
-        stats_bundle = [rounds_won, real_god]
+        stats_bundle = [rounds_won, self.all_real_gods_list]
 
         Stats(self, stats_bundle)
-
-    def close_play(self):
-        # shows the root and end current
-        root.deiconify()
-        # allows new game to start
-        self.play_box.destroy()
 
 
 class Stats:
