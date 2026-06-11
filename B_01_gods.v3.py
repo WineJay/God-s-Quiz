@@ -1,5 +1,3 @@
-from enum import auto
-from pydoc import text
 from tkinter import *
 from functools import partial  # To prevent unwanted windows
 import csv
@@ -335,6 +333,10 @@ class Play:
 
         Stats(self, stats_bundle)
 
+    def to_hints(self):
+            """this will display the text for hints functions"""
+            DisplayHints(self)
+
 
 class Stats:
     """
@@ -445,6 +447,60 @@ class Stats:
         partner.stats_button.config(state=NORMAL)
         self.stats_box.destroy()
 
+class DisplayHints:
+    """
+    Displays hints for God's quiz Game
+     """
+
+    def __init__(self, partner):
+        background = "#ffe6cc"
+        self.help_box = Toplevel()
+
+        # disable help button
+        partner.hints_button.config(state=DISABLED)
+
+        # If users press cross at top, closes help and
+        # 'releases' help button
+        self.help_box.protocol('WM_DELETE_WINDOW',
+                                partial(self.close_hints, partner))
+
+        self.help_frame = Frame(self.help_box, width=300,
+                                    height=200,
+                                    bg=background)
+        self.help_frame.grid()
+
+        self.help_heading_label = Label(self.help_frame,
+                                            bg=background,
+                                            text="Hints",
+                                            font=("Arial", 14, "bold"))
+        self.help_heading_label.grid(row=0)
+
+        help_text = ("If you are struggling to find a power that is for the god  you are asked to look for, "
+                     "then there a very easy way to find their power."
+                     "\n\nFirst off have a look at their name and try to match it with their power. "
+                     "\n\n(Eg: Flora's power is Flower)"
+                     "\n\n The other way off trying to figure out their power is by looking at their Origin or their"
+                     " type. The one with natural powers such as darkness, sky, sea are mostly the god's with Major"
+                     " powers, while the one's with  fire, sleep, light are most likely Minor type of God." )
+
+        self.help_text_label = Label(self.help_frame, bg=background,
+                                         text=help_text, wraplength=350,
+                                         justify="center")
+        self.help_text_label.grid(row=1, padx=10)
+
+        self.close_button = Button(self.help_frame,
+                                         font=("Arial", 12, "bold"),
+                                         text="Close", bg="#CC6600",
+                                         fg="#FFFFFF",
+                                         command=partial(self.close_hints,partner))
+        self.close_button.grid(row=2, padx=10, pady=10)
+
+        # closes help dialogue (used by button and x at top of dialogue)
+
+    def close_hints(self, partner):
+        # Put help button back to normal...
+        partner.hints_button.config(state=NORMAL)
+        self.help_box.destroy()
 
 # main routine
 if __name__ == "__main__":
