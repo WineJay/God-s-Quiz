@@ -27,6 +27,7 @@ def get_round_power():
 
     round_power = []
     gods_name = []
+    origin = []
     # loop until we have 4 different gods
     while len(round_power) < min(4, len(all_gods_list)):
         potential_power = random.choice(all_gods_list)
@@ -35,6 +36,7 @@ def get_round_power():
         if potential_power[3] not in gods_name:
             round_power.append(potential_power)
             gods_name.append(potential_power[2])
+            origin.append(potential_power[0])
 
     print("round power", round_power)
     return round_power
@@ -142,6 +144,7 @@ class Play:
         self.round_power_list = ()
         self.target_god = ()
         self.target_power= ()
+        self.origin=()
         self.rounds_requested = IntVar()
         self.play_box = Toplevel()
 
@@ -157,8 +160,9 @@ class Play:
         play_label_list = [
 
             ["", ("Arial", 16, "bold"), "#ffe6cc", 1],
-            ["Choose a power below", body_font, "#D5E8D4", 2],
-            ["You chose , result", body_font, "#D5E8D4", 4]
+            ["", ("Arial", 16, "bold"), "#ffe6cc", 2],
+            ["Choose a power below", body_font, "#D5E8D4", 3],
+            ["You chose , result", body_font, "#D5E8D4", 5]
         ]
 
         play_label_ref = []
@@ -171,12 +175,13 @@ class Play:
 
         # retrieving the labels
         self.name_label = play_label_ref[0]
-        self.chosen_label = play_label_ref[1]
-        self.results_label = play_label_ref[2]
+        self.gods_origin = play_label_ref[1]
+        self.chosen_label = play_label_ref[2]
+        self.results_label = play_label_ref[3]
 
         # powers for the buttons
         self.power_frame = Frame(self.game_frame, bg="#ffe6cc")
-        self.power_frame.grid(row=3)
+        self.power_frame.grid(row=4)
 
         # set up the power buttons
         self.power_button_ref = []
@@ -193,18 +198,18 @@ class Play:
             # retrieve next round, and end game button
         self.next_round_button = Button(self.game_frame, text= "Next Round", font=("Arial", 16, "bold"),
                                 fg="#ffffff", bg="#0057D8",width=21, command=self.next_round)
-        self.next_round_button.grid(row=5, pady=5)
+        self.next_round_button.grid(row=6, pady=5)
         self.stats_button = Button(self.game_frame, text="Stats", font=("Arial", 16, "bold"),
                                    fg="#FFFFFF", bg="#EFBF04", width=21, command=self.to_stats)
-        self.stats_button.grid(row=6, pady=5)
+        self.stats_button.grid(row=7, pady=5)
 
         self.hints_button = Button(self.game_frame, font=("Arial", 16, "bold"), text="Hints", width=21, fg="#FFFFFF",
                                    bg="#990000", command=self.to_hints)
-        self.hints_button.grid(row=7, pady=5)
+        self.hints_button.grid(row=8, pady=5)
         self.end_game_button = Button(self.game_frame, text="End Game", font=("Arial", 16, "bold"),
                                       fg="#FFFFFF", bg="#990000", width=21, command=self.close_play)
 
-        self.end_game_button.grid(row=8, pady=5)
+        self.end_game_button.grid(row=9, pady=5)
 
         self.next_round()
     def next_round(self):
@@ -224,6 +229,8 @@ class Play:
         # picks a god from the 4 sets it retreives and then picks a random 1 out of 4
         real_god = random.choice(self.round_power_list)
         print("random string out of the 4", real_god)
+        gods_origin = real_god[0]
+        print("gods origin", gods_origin)
 
         # since my gods name is in index 2 and power in 3
         self.target_god = real_god[2]
@@ -231,6 +238,7 @@ class Play:
 
         self.game_heading_label.config(text=f"Round {rounds_played +1} of {rounds_requested} ")
         self.name_label.config(text=f"Name of god: {self.target_god}")
+        self.gods_origin.config(text=f"Origin: {gods_origin}")
         self.results_label.config(text=f"{'='}")
 
         for count, item in enumerate(self.power_button_ref):
