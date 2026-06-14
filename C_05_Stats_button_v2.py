@@ -2,6 +2,7 @@ from tkinter import *
 from functools import partial  # To prevent unwanted windows
 import csv
 import random
+from tabulate import tabulate
 
 
 def get_powers():
@@ -212,6 +213,7 @@ class Play:
         self.end_game_button.grid(row=9, pady=5)
 
         self.next_round()
+        self.round_history_list = []
     def next_round(self):
         """
         Chooses four colours, works out meadian for real_god to beat. configures buttons with chosen colours
@@ -284,6 +286,8 @@ class Play:
             result_bg = "#82B366"
             self.all_real_gods_list.append(1)
 
+            self.round_history_list.append([real_god, power_name, "Correct"])
+
             rounds_won = self.rounds_won.get()
             rounds_won += 1
             self.rounds_won.set(rounds_won)
@@ -291,6 +295,8 @@ class Play:
             result_text = f"Oops {power_name} is not the power of {real_god}."
             result_bg = "#F8CECC"
             self.all_real_gods_list.append(0)
+
+            self.round_history_list.append([real_god, power_name, "Incorrect"])
 
         self.results_label.config(text=result_text, bg=result_bg)
 
@@ -342,110 +348,13 @@ class Play:
         # IMPORTANT: retrieve number of rounds
         # won as a number (rather than the 'self' container)
         rounds_won = self.rounds_won.get()
-        stats_bundle = [rounds_won, self.all_real_gods_list]
+        stats_bundle = [rounds_won, self.all_real_gods_list, self.round_history_list]
 
         Stats(self, stats_bundle)
 
     def to_hints(self):
         """this will display the text for hints functions"""
         DisplayHints(self)
-
-
-class Stats:
-    """
-    Displays stats for Colour Quest Game
-    """
-
-    def __init__(self, partner, all_stats_info):
-
-        # Extract information from master list...
-        rounds_won = all_stats_info[0]
-        user_played = all_stats_info[1]
-        #potential_power = all_stats_info[2]
-
-        # sort user real_gods to find high real_god...
-        user_played.sort()
-        self.stats_box = Toplevel()
-        self.stats_box.title("Guess the God's Power")
-
-        # disable help button
-        partner.stats_button.config(state=DISABLED)
-
-        # If users press cross at top, closes help and
-        # 'releases' help button
-        self.stats_box.protocol('WM_DELETE_WINDOW',
-                                partial(self.close_stats, partner))
-
-        self.stats_frame = Frame(self.stats_box, width=350)
-        self.stats_frame.grid()
-
-        # Math to populate Stats dialogue...
-        rounds_played = len(user_played)
-        rounds_requested = partner.rounds_requested.get()
-        success_rate = (rounds_won / rounds_played * 100) if rounds_played > 0  else 0
-        total_real_god = rounds_won
-
-        # Strings for Stats labels...
-
-        success_string = (f"Success Rate: {rounds_won} / {rounds_played}"
-                          f" ({success_rate:.0f}%)")
-        total_real_god_string = f"Total: {total_real_god}"
-
-        heading_font = ("Arial", "16", "bold")
-        normal_font = ("Arial", "14")
-        comment_font = ("Arial", "13")
-
-        self.stats_title = Label(self.stats_frame, text="Statistics", font=heading_font,
-                                 bg="#ffffff", fg="#000000", justify="left", anchor="w")
-        self.stats_title.grid(row=0, pady=(0,15))
-
-        self.success_string = (f"Success Rate: {rounds_won} / {rounds_played} ({success_rate:.0f}%)")
-
-        total_real_god_string = f"You have got right {total_real_god} answers right!"
-
-        all_stats_string = [
-            f"Rounds Asked: {rounds_requested}",
-            f"Rounds Won: {rounds_won}",
-            success_string,
-            total_real_god_string
-        ]
-
-        stats_label_ref_list = []
-        for count, item in enumerate(all_stats_string):
-            self.stats_label = Label(self.stats_frame, text=item, font=("Arial", 16), wraplength=300,
-                                     anchor="w", justify="left",padx=30, pady=5)
-            self.stats_label.grid(row=count +1, sticky="W", padx=10)
-            stats_label_ref_list.append(self.stats_label)
-
-
-        if success_rate <60:
-            self.stats_statement = Label(self.stats_frame, text="You didn't win 😥 Please try again!",
-                                         font=("Arial", 16, "bold"), bg="#D91A1A", fg="#ffffff", justify="center",
-                                            width=32, pady=6)
-            self.stats_statement.grid(row=5, sticky="EW" ,padx=5, pady=5)
-
-
-        else:
-            self.stats_statement = Label(self.stats_frame, text="You did it! 😊")
-            self.stats_statement.grid(row=6, sticky="EW", padx=5, pady=5)
-
-
-
-
-        self.dismiss_button = Button(self.stats_frame,
-                                     font=("Arial", 16, "bold"),
-                                     text="Dismiss", bg="#333333",
-                                     fg="#FFFFFF", width=20,
-                                     command=partial(self.close_stats,
-                                                     partner))
-        self.dismiss_button.grid(row=8, padx=10, pady=10)
-
-        # closes help dialogue (used by button and x at top of dialogue)
-
-    def close_stats(self, partner):
-        # Put help button back to normal...
-        partner.stats_button.config(state=NORMAL)
-        self.stats_box.destroy()
 
 class DisplayHints:
     """
@@ -504,6 +413,99 @@ class DisplayHints:
         # Put help button back to normal...
         partner.hints_button.config(state=NORMAL)
         self.help_box.destroy()
+
+class Stats:
+
+    """
+    Displays stats for Colour Quest Game
+    """
+
+    def __init__(self, partner, all_stats_info):
+
+        # Extract information from master list...
+        rounds_won = all_stats_info[0]
+        user_played = all_stats_info[1]
+        # for tabulate to show
+        round_history = all_stats_info[2]
+
+        # sort user real_gods to find high real_god...
+        user_played.sort()
+        self.stats_box = Toplevel()
+        self.stats_box.title("Guess the God's Power")
+
+        # disable help button
+        partner.stats_button.config(state=DISABLED)
+
+        # If users press cross at top, closes help and
+        # 'releases' help button
+        self.stats_box.protocol('WM_DELETE_WINDOW',
+                                partial(self.close_stats, partner))
+
+
+        self.stats_frame = Frame(self.stats_box, width=350, bg="#ffe6cc", pady=20, padx=25)
+        self.stats_frame.grid()
+
+        # Math to populate Stats dialogue...
+        rounds_played = len(user_played)
+        rounds_requested = partner.rounds_requested.get()
+        success_rate = (rounds_won / rounds_played * 100) if rounds_played > 0  else 0
+        total_real_god = rounds_won
+
+        # Strings for Stats labels...
+
+        success_string = (f"Success Rate: {rounds_won} / {rounds_played}"
+                          f" ({success_rate:.0f}%)")
+        total_real_god_string = f"Total: {total_real_god}"
+
+        heading_font = ("Arial", "16", "bold")
+        normal_font = ("Arial", "14")
+        comment_font = ("Arial", "13")
+
+        self.stats_title = Label(self.stats_frame, text="Your Progress along the way",
+                                 bg="#ffffff", fg="#000000", justify="center", anchor="w")
+        self.stats_title.grid(row=0, pady=(0,15))
+
+        self.success_string = (f"Success Rate: {rounds_won} / {rounds_played} ({success_rate:.0f}%)")
+
+        total_real_god_string = f"You have got right {total_real_god} answers right!"
+        # folowing codes for the tabulate table
+        headers = ["God", "User Choice", "Correct / incorrect"]
+        # format for tabulate's grid
+        table_string = tabulate(round_history, headers, tablefmt="fancy_grid", maxcolwidths=[15,15,12])
+
+        self.table_label = Label(self.stats_frame, text=table_string, font=("Consolas" , 10), justify="left", anchor="w",
+                                 bg="#ffffff", fg="#000000", bd=1, padx=10, pady=10)
+        self.table_label.grid(row=2)
+
+
+        if success_rate <60:
+            self.stats_statement = Label(self.stats_frame, text="You didn't win 😥 Please try again!",
+                                         font=("Arial", 16, "bold"), bg="#D91A1A", fg="#ffffff", justify="center",
+                                            width=32, pady=6)
+            self.stats_statement.grid(row=3, sticky="EW" ,padx=5, pady=5)
+
+
+        else:
+            self.stats_statement = Label(self.stats_frame, text="You did it! 😊")
+            self.stats_statement.grid(row=3, sticky="EW", padx=5, pady=5)
+
+
+
+
+        self.dismiss_button = Button(self.stats_frame,
+                                     font=("Arial", 16, "bold"),
+                                     text="Dismiss", bg="#333333",
+                                     fg="#FFFFFF", width=20,
+                                     command=partial(self.close_stats,
+                                                     partner))
+        self.dismiss_button.grid(row=4, padx=10, pady=10)
+
+        # closes help dialogue (used by button and x at top of dialogue)
+
+    def close_stats(self, partner):
+        # Put help button back to normal...
+        partner.stats_button.config(state=NORMAL)
+        self.stats_box.destroy()
 
 # main routine
 if __name__ == "__main__":
