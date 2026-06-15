@@ -98,7 +98,7 @@ class StartGame:
         self.play_button.grid(row=0, column=1, padx=10, pady=10)
 
     def check_rounds(self):
-        # Retrieve Temperature to be converted.
+        # checks the amount of rounds the user is going to play so that we won't play a random number of rounds or infinite.
         round_asked = self.num_rounds_entry.get()
 
         # reset label and entry box ( for when user comes back to home screen)
@@ -114,7 +114,6 @@ class StartGame:
             if round_asked > 0:
                 Play(round_asked)
                 root.withdraw()
-
 
             else:
                 has_errors = "yes"
@@ -221,18 +220,15 @@ class Play:
         self.round_history_list = []
     def next_round(self):
         """
-        Chooses four colours, works out meadian for real_god to beat. configures buttons with chosen colours
+        chooses another 4 lists where a different god along with 4 different powers are retrieved. (some power may seem
+        the same because there are many duplicates but there is no more than 2 duplicates, and sometimes they are not the
+        right answer)
         """
-        # retrieve number of rounds played, add one tp it and configure heading
+        # retrieve number of rounds played, add one to it and configure heading
         rounds_played = self.round_played.get()
-        #rounds_played += 1
-        #self.round_played.set(rounds_played)
-
         rounds_requested = self.round_asked.get()
 
         self.round_power_list = get_round_power()
-        # enable power buttons (disabled at the end of the last round)
-
         # picks a god from the 4 sets it retreives and then picks a random 1 out of 4
         real_god = random.choice(self.round_power_list)
         print("random string out of the 4", real_god)
@@ -272,28 +268,25 @@ class Play:
         """
         retrieves which power button was pressed
         """
-        #power_button = self.power_button
-        #power_button.config(state=DISABLED)
+        # finds the real answer to the quiz for user's choice
         real_god = self.target_god
         real_power = self.target_power
 
+        # find the number of rounds the user asked for and the rounds user had won.
         rounds_requested = self.round_asked.get()
         rounds_won = self.rounds_won.get()
 
         # alternate way to get button name. good for buttons have been scrambled
         power_name = self.power_button_ref[user_choice].cget('text')
 
-        # retrieve target real_god and compare with user real_god to find round result
-        #self.target_god.config(real_god)
-        #target = self.target_god
-        #target_power = self.target_power
+        # checks if the user pressed on the correct answer for the quiz or not
 
         if  real_power == power_name :
             pass
             result_text = f"Success! {power_name} was the answer for {real_god}"
             result_bg = "#82B366"
             self.all_real_gods_list.append(1)
-
+            # if the answer was correct it shows to the stats function where it is stored as correct
             self.round_history_list.append([real_god, power_name, "Correct"])
 
             rounds_won = self.rounds_won.get()
@@ -303,9 +296,9 @@ class Play:
             result_text = f"Oops {power_name} is not the power of {real_god}."
             result_bg = "#F8CECC"
             self.all_real_gods_list.append(0)
-
+            # if the result is incorrect it shows the stats function where it shows the answer was incorrect
             self.round_history_list.append([real_god, power_name, "Incorrect"])
-
+        # changes the results label so that it matches the answer instead of staying as default all time.
         self.results_label.config(text=result_text, bg=result_bg)
 
         # for the buttons to go red for incorrcect and green for correct
@@ -317,8 +310,7 @@ class Play:
         if power_name != real_power:
             self.power_button_ref[user_choice].config(bg="#F8CECC")
 
-
-        # enables stats & next button, disable colour buttons
+        # enables stats & next button, disable power buttons
         self.next_round_button.config(state=NORMAL)
         self.stats_button.config(state=NORMAL)
 
@@ -330,18 +322,11 @@ class Play:
         print("played rounds", rounds_played)
         #rounds_wanted = self.rounds_requested.get()
 
-        # code for when the game ends
+        # code for when the rounds end
         if rounds_played == rounds_requested:
             # CONFIGURE 'END GAME' labels / buttons
             self.game_heading_label.config(text="Game Over")
             self.chosen_label.config(text="Please click the stats button for more info.")
-            # work out the success rate
-            success_rate = rounds_played / rounds_won * 100
-            success_string = (f"Success Rate: " f"{rounds_won} / {rounds_played} "
-                              f"({success_rate:.0f}%)")
-
-
-
             self.next_round_button.config(state=DISABLED, text="Game Over")
             self.stats_button.config(bg="#990000")
             self.end_game_button.config(text="Play Again", bg="#006600")
@@ -404,9 +389,6 @@ class DisplayHints:
                                          text=help_text, wraplength=350,
                                          justify="left")
         self.help_text_label.grid(row=1, padx=10)
-        self.find_the_answer_button = Button(self.help_frame, font=("Arial", 16, "bold"), text="Find the Power", bg=
-                                             "#cc6600",fg="#ffffff", command=partial(self.answer_hint,partner) )
-        self.find_the_answer_button.grid(row=2, padx=10, pady=10)
 
         self.close_button = Button(self.help_frame,
                                          font=("Arial", 12, "bold"),
