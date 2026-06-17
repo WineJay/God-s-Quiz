@@ -329,7 +329,7 @@ class Play:
         rounds_played = self.round_played.get()
         rounds_played += 1
         self.round_played.set(rounds_played)
-        print("played rounds", rounds_played)
+        
         #rounds_wanted = self.rounds_requested.get()
 
         # code for when the rounds end
