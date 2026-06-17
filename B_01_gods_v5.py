@@ -3,6 +3,7 @@ from functools import partial  # To prevent unwanted windows
 import csv
 import random
 from tabulate import tabulate
+from datetime import date
 
 
 def get_powers():
@@ -35,7 +36,7 @@ def get_round_power():
         potential_power = random.choice(all_gods_list)
 
         # check if the power is for the correct god
-        if potential_power[3] not in gods_name:
+        if potential_power not in gods_name:
             round_power.append(potential_power)
             gods_name.append(potential_power[2])
             origin.append(potential_power[0])
@@ -67,7 +68,7 @@ class StartGame:
         start_labels_list = [
             ["Guess the God", ("Arial", 16, "bold"), None],
             [intro_string, ("Arial", 12), None],
-            [choose_string, ("Arial", 12, "bold"), "#FFFFFF"]
+            [choose_string, ("Arial", 12, "bold"), "#474747"]
         ]
 
         # create labels and add them to the reference list...
@@ -87,23 +88,24 @@ class StartGame:
         self.entry_area_frame = Frame(self.start_frame)
         self.entry_area_frame.grid(row=3)
 
+        # enters the number of rounds the user will play
         self.num_rounds_entry = Entry(self.entry_area_frame, font=("Arial", 20, "bold"), width=10, )
         self.num_rounds_entry.grid(row=0, column=0, padx=10, pady=10)
 
         # create play button...
 
         self.play_button = Button(self.entry_area_frame, font=("Arial", 16, "bold"),
-                                  fg="#FFFFFF", bg="#009900", text="Play", width=10,
+                                  fg="#FFFFFF", bg="#006600", text="Play", width=10,
                                   command=self.check_rounds)
         self.play_button.grid(row=0, column=1, padx=10, pady=10)
 
     def check_rounds(self):
-        # checks the amount of rounds the user is going to play so that we won't play a random number of rounds or infinite.
+    # checks the amount of rounds the user is going to play so that we won't play a random number of rounds or infinite.
         round_asked = self.num_rounds_entry.get()
 
         # reset label and entry box ( for when user comes back to home screen)
-        self.choose_label.config(fg="#009900", font=("Arial", 12, "bold"))
-        self.num_rounds_entry.config()
+        self.choose_label.config(fg="#006600", font=("Arial", 12, "bold"))
+        self.num_rounds_entry.config(bg="#90EE90")
 
         error = "Oops - Please choose a whole number more than zero"
         has_errors = "no"
@@ -134,15 +136,19 @@ class Play:
     """
 
     def __init__(self, _amount_):
-
+        # retrieves the number of rounds the user had asked for
         self.round_asked = IntVar(value=_amount_)
+        # finds the number of rounds the user played
         self.round_played = IntVar()
         self.round_played.set(0)
+        # calculates the number of rounds the user has won while playing the rounds
         self.rounds_won = IntVar()
         self.rounds_won.set(0)
 
+        # finds the list where the real god and power is
         self.all_real_gods_list = []
 
+        # these for the play class or the quiz page
         self.round_power_list = ()
         self.target_god = ()
         self.target_power= ()
@@ -154,6 +160,7 @@ class Play:
         self.game_frame = Frame(self.play_box, bg="#ffe6cc")
         self.game_frame.grid(padx=10, pady=10)
 
+        #this is for the quiz page where the game starts from 1 and continues to the round the user has asked for
         self.game_heading_label = Label(self.game_frame, text=f"Round 1 of {_amount_}", font=("Arial", 16, "bold"))
         self.game_heading_label.grid(row=0)
 
@@ -169,6 +176,7 @@ class Play:
             ["You chose , result", body_font, "#ffe6cc", 6]
         ]
 
+        # this is where the Labels are referenced and sorted into their rows through their order.
         play_label_ref = []
         for item in play_label_list:
             self.make_label = Label(self.game_frame, text=item[0], font=item[1],
@@ -200,22 +208,25 @@ class Play:
 
             self.power_button_ref.append(self.power_button)
 
-            # retrieve next round, and end game button
+            # retrieve next round button
         self.next_round_button = Button(self.game_frame, text= "Next Round", font=("Arial", 16, "bold"),
                                         fg="#ffffff", bg="#0057D8",width=21, command=self.next_round)
         self.next_round_button.grid(row=7, pady=5)
-        self.stats_button = Button(self.game_frame, text="Stats", font=("Arial", 16, "bold"),
-                                   fg="#FFFFFF", bg="#EFBF04", width=21, command=self.to_stats)
+        # the stats Button
+        self.stats_button = Button(self.game_frame, text="Progress", font=("Arial", 16, "bold"),
+                                   fg="#ffffff", bg="#FCE27E", width=21, command=self.to_stats)
         self.stats_button.grid(row=8, pady=5)
-
+        # the Hints button
         self.hints_button = Button(self.game_frame, font=("Arial", 16, "bold"), text="Hints", width=21, fg="#FFFFFF",
-                                   bg="#00FFFF", command=self.to_hints)
+                                   bg="#005C5C", command=self.to_hints)
         self.hints_button.grid(row=9, pady=5)
+        # the End game button
         self.end_game_button = Button(self.game_frame, text="End Game", font=("Arial", 16, "bold"),
                                       fg="#FFFFFF", bg="#990000", width=21, command=self.close_play)
 
         self.end_game_button.grid(row=10, pady=5)
 
+        # continues when there is more rounds and there a history to add at the stats function where the correct and incorrect is shown
         self.next_round()
         self.round_history_list = []
     def next_round(self):
@@ -245,7 +256,7 @@ class Play:
         self.name_label.config(text=f"Name of God: {self.target_god}")
         self.gods_origin.config(text=f"Origin: {gods_origin}")
         self.type_of_god.config(text=f"Type: {type_of_god}")
-        self.results_label.config(text="", bg="#ffe6cc", justify="center", padx=10, pady=10)
+        self.results_label.config(text="", bg="#ffe6cc", justify="center")
 
         self.button_lookup = {}
 
@@ -299,7 +310,7 @@ class Play:
             # if the result is incorrect it shows the stats function where it shows the answer was incorrect
             self.round_history_list.append([real_god, power_name, "Incorrect"])
         # changes the results label so that it matches the answer instead of staying as default all time.
-        self.results_label.config(text=result_text, bg=result_bg)
+        self.results_label.config(text=result_text, bg=result_bg, wraplength=200)
 
         # for the buttons to go red for incorrcect and green for correct
         for button in self.power_button_ref:
@@ -418,6 +429,8 @@ class Stats:
         # for tabulate to show
         round_history = all_stats_info[2]
 
+        self.round_history = round_history
+
         # sort user real_gods to find high real_god...
         user_played.sort()
         self.stats_box = Toplevel()
@@ -473,7 +486,7 @@ class Stats:
         self.table_label.grid(row=3)
 
 
-        if success_rate <60:
+        if success_rate <59:
             self.stats_statement = Label(self.stats_frame, text="You didn't win 😥 Please try again!",
                                          font=("Arial", 12, "bold"), bg="#D91A1A", fg="#ffffff", justify="center",
                                             width=32, pady=10)
@@ -485,7 +498,9 @@ class Stats:
             self.stats_statement.grid(row=4, sticky="EW", padx=5, pady=5)
 
 
-
+        self.export_button = Button(self.stats_frame, font=("Arial", 16, "bold"), text="Export",
+                                    bg="#004C99", fg="#ffffff", width=20, command=partial(self.export_results))
+        self.export_button.grid(row=5, padx=5, pady=5)
 
         self.dismiss_button = Button(self.stats_frame,
                                      font=("Arial", 16, "bold"),
@@ -493,15 +508,40 @@ class Stats:
                                      fg="#FFFFFF", width=20,
                                      command=partial(self.close_stats,
                                                      partner))
-        self.dismiss_button.grid(row=5, padx=10, pady=10)
+        self.dismiss_button.grid(row=6, padx=10, pady=10)
 
         # closes help dialogue (used by button and x at top of dialogue)
+
+    def export_results(self):
+        # **** Get current date for heading and filename ***
+        today = date.today()
+
+        # get day, month and year as individual strings
+        day = today.strftime("%d")
+        month = today.strftime("%m")
+        year = today.strftime("%Y")
+
+        file_name = f"Gods_quiz_{year}_{month}_{day}"
+
+        headers = ["God's Name", "User Choice", "Correct / Incorrect"]
+        table_string = tabulate(self.round_history, headers=headers, tablefmt="fancy_grid", maxcolwidths=[15,15,12])
+
+        with open(file_name, "w", encoding="utf-8") as text_file:
+            text_file.write("***** Guess the God's Power *****\n")
+            text_file.write(f"Generated: {day}/{month}/{year}\n\n")
+
+            text_file.write("Here is the results of each rounds you played...\n")
+            text_file.write(table_string)
+            text_file.write("\n\nThanks for playing this rounds!")
+
+        success_string = f"Export was Successful! File Name: {file_name}"
+        self.stats_statement.config(text=success_string, bg="#009900", fg="#ffffff", width=32, wraplength=300)
+        self.export_button.config(state=DISABLED,text="Exported!")
 
     def close_stats(self, partner):
         # Put help button back to normal...
         partner.stats_button.config(state=NORMAL)
         self.stats_box.destroy()
-
 # main routine
 if __name__ == "__main__":
     root = Tk()
