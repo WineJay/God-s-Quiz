@@ -35,7 +35,7 @@ def get_round_power():
     while len(round_power) < min(4, len(all_gods_list)):
         potential_power = random.choice(all_gods_list)
 
-        # check if the power is for the correct god
+        # check if the power is for the correct god and also gets the origin and type of the god
         if potential_power not in gods_name:
             round_power.append(potential_power)
             gods_name.append(potential_power[2])
@@ -157,11 +157,12 @@ class Play:
         self.rounds_requested = IntVar()
         self.play_box = Toplevel()
 
+        # the frame where everything will set
         self.game_frame = Frame(self.play_box, bg="#ffe6cc")
         self.game_frame.grid(padx=10, pady=10)
 
         #this is for the quiz page where the game starts from 1 and continues to the round the user has asked for
-        self.game_heading_label = Label(self.game_frame, text=f"Round 1 of {_amount_}", font=("Arial", 16, "bold"))
+        self.game_heading_label = Label(self.game_frame, text=f"Round 1 of {_amount_}", font=("Arial", 16, "bold"), bg="#ffe6cc")
         self.game_heading_label.grid(row=0)
 
         # body font for the labels
@@ -252,6 +253,7 @@ class Play:
         self.target_god = real_god[2]
         self.target_power = real_god[3]
 
+        # changes everything for the new round
         self.game_heading_label.config(text=f"Round {rounds_played +1} of {rounds_requested} ")
         self.name_label.config(text=f"Name of God: {self.target_god}")
         self.gods_origin.config(text=f"Origin: {gods_origin}")
@@ -299,6 +301,7 @@ class Play:
             # if the answer was correct it shows to the stats function where it is stored as correct
             self.round_history_list.append([real_god, power_name, "Correct"])
 
+            # adds one to the rounds won
             rounds_won = self.rounds_won.get()
             rounds_won += 1
             self.rounds_won.set(rounds_won)
@@ -400,6 +403,7 @@ class DisplayHints:
                                          justify="left")
         self.help_text_label.grid(row=1, padx=10)
 
+        # close hints
         self.close_button = Button(self.help_frame,
                                          font=("Arial", 12, "bold"),
                                          text="Close", bg="#CC6600",
@@ -453,11 +457,11 @@ class Stats:
         success_rate = (rounds_won / rounds_played * 100) if rounds_played > 0  else 0
         total_real_god = rounds_won
 
+        self.stats_title.grid(row=0, pady=16, padx=16)
         # Strings for Stats labels...
 
-        self.stats_title = Label(self.stats_frame, text="Your Progress along the way",
-                                 bg="#ffffff", fg="#000000", justify="center", anchor="w")
-        self.stats_title.grid(row=0, pady=(0,15))
+        self.stats_title = Label(self.stats_frame, text="Your Progress along the way", font=("Arial", 15, "bold"),
+                                 bg="#ffe6cc", fg="#000000", justify="center", anchor="w")
 
         success_string = (f"Success Rate: {rounds_won} / {rounds_played} ({success_rate:.0f}%)")
 
@@ -471,7 +475,7 @@ class Stats:
 
         stats_label_ref_list = []
         for count, item in enumerate(all_stats_string):
-            self.stats_label = Label(self.stats_frame, text=item, font=("Arial", 16), wraplength=300,
+            self.stats_label = Label(self.stats_frame, text=item, font=("Arial", 15), wraplength=300,
                                      anchor="w", justify="left",padx=30, pady=5, bg="#ffe6cc")
             self.stats_label.grid(row=count +1, sticky="W", padx=10)
             stats_label_ref_list.append(self.stats_label)
